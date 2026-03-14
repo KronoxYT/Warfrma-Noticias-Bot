@@ -4,6 +4,47 @@
 
 pnpm workspace monorepo using TypeScript. Each package manages its own dependencies.
 
+## Warfrma Noticias — Discord Bot
+
+A community Discord bot for Warframe focused on news, trading prices, builds, and price alerts.
+
+### Bot Package: `artifacts/warframe-bot` (`@workspace/warframe-bot`)
+
+- **Entry point**: `src/index.js` — starts Express keep-alive server, loads commands, connects to Discord
+- **Command deployment**: `src/deploy-commands.js` — run once to register slash commands with Discord
+- **Commands**: `src/commands/` — one file per slash command
+  - `news.js` — `/news`: Latest Warframe news from warframestat.us
+  - `price.js` — `/price <item>`: Cheapest seller on Warframe Market
+  - `build.js` — `/build <name>`: Community builds from local JSON database
+  - `alerts.js` — `/alerts <item> <price>`: Subscribe to price drop alerts
+- **Services**: `src/services/`
+  - `warframeNewsService.js` — Fetches news from Warframe Status API
+  - `warframeMarketService.js` — Fetches orders from Warframe Market API
+- **Database**: `src/database/`
+  - `builds.json` — Local build database (add new entries here)
+  - `alerts.json` — Active price alerts (written automatically)
+- **Utils**: `src/utils/`
+  - `formatItemName.js` — Normalizes item names for API calls
+  - `embedBuilder.js` — Creates all Discord embeds with consistent styling
+
+### Bot Workflow
+
+The bot runs as the "Warfrma Noticias Bot" workflow.
+
+To add new slash commands:
+1. Create a new file in `src/commands/` with `export const data` (SlashCommandBuilder) and `export async function execute(interaction)`
+2. Re-run `node src/deploy-commands.js` from `artifacts/warframe-bot/`
+3. Restart the workflow
+
+To add new builds: edit `src/database/builds.json` with the item key in snake_case.
+
+### Environment Variables Required
+
+- `DISCORD_TOKEN` — Bot token (Discord Developer Portal)
+- `CLIENT_ID` — Application ID
+- `GUILD_ID` — Discord server ID
+- `PORT` — Auto-set by Replit for keep-alive Express server
+
 ## Stack
 
 - **Monorepo tool**: pnpm workspaces

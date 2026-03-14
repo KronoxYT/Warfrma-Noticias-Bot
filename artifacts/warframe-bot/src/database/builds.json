@@ -1,0 +1,98 @@
+{
+  "laetum": {
+    "type": "weapon",
+    "mods": [
+      "Galvanized Diffusion",
+      "Hornet Strike",
+      "Lethal Torrent",
+      "Augur Pact",
+      "Hydraulic Crosshairs",
+      "Pistol Pestilence",
+      "Frostbite",
+      "Scorch"
+    ],
+    "description": "High DPS Incarnon build focused on status and critical chance. Activate Incarnon form for maximum burst damage.",
+    "forma": 5,
+    "difficulty": "Intermediate"
+  },
+  "mesa": {
+    "type": "warframe",
+    "mods": [
+      "Intensify",
+      "Blind Rage",
+      "Fleeting Expertise",
+      "Streamline",
+      "Continuity",
+      "Natural Talent",
+      "Steel Fiber",
+      "Adaptation"
+    ],
+    "description": "Peacemaker DPS build. Use Shooting Gallery for damage buff and Shatter Shield for survivability.",
+    "forma": 4,
+    "difficulty": "Beginner"
+  },
+  "saryn": {
+    "type": "warframe",
+    "mods": [
+      "Intensify",
+      "Blind Rage",
+      "Fleeting Expertise",
+      "Streamline",
+      "Overextended",
+      "Stretch",
+      "Spore Augment",
+      "Regenerative Molt"
+    ],
+    "description": "Spore spread nuke build. Great for Steel Path and endurance runs. Spread spores with Molt for area clear.",
+    "forma": 5,
+    "difficulty": "Intermediate"
+  },
+  "kuva_bramma": {
+    "type": "weapon",
+    "mods": [
+      "Primed Ravage",
+      "Vital Sense",
+      "Point Strike",
+      "Hunter Munitions",
+      "Vigilante Armaments",
+      "Bladed Rounds",
+      "Galvanized Arrow",
+      "Thermite Rounds"
+    ],
+    "description": "Explosive crit build. Best used against groups of enemies. Pair with a fire rate source for faster reloads.",
+    "forma": 6,
+    "difficulty": "Advanced"
+  },
+  "wisp": {
+    "type": "warframe",
+    "mods": [
+      "Natural Talent",
+      "Intensify",
+      "Transient Fortitude",
+      "Blind Rage",
+      "Fleeting Expertise",
+      "Streamline",
+      "Primed Continuity",
+      "Stretch"
+    ],
+    "description": "Support/damage hybrid. Drop Reservoirs for team buffs. Shock Mote provides CC while Haste Mote boosts fire rate.",
+    "forma": 4,
+    "difficulty": "Beginner"
+  },
+  "torid": {
+    "type": "weapon",
+    "mods": [
+      "Galvanized Diffusion",
+      "Hornet Strike",
+      "Lethal Torrent",
+      "Pistol Pestilence",
+      "Scorch",
+      "Frostbite",
+      "Jolt",
+      "Primed Heated Charge"
+    ],
+    "description": "Gas status cloud build. Excellent for Incarnon mode. Pairs well with Saryn or any frame that benefits from toxin procs.",
+    "forma": 4,
+    "difficulty": "Intermediate"
+  }
+}
