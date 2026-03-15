@@ -1,0 +1,15 @@
+packages:
+  "framer-motion": "For premium, smooth page transitions and sci-fi entry animations"
+  "lucide-react": "For crisp, modern iconography that fits the technical dashboard aesthetic"
+  "date-fns": "For elegant date formatting in the news feed"
+  "clsx": "Utility for conditional Tailwind class merging"
+  "tailwind-merge": "Utility for merging Tailwind classes safely"
+
+images:
+  - path: "artifacts/warframe-dashboard/public/images/hero-bg.png"
+    description: "Dark moody sci-fi space background, deep space nebula with subtle glowing amber and electric blue dust, high contrast, technical HUD aesthetic, minimal"
+    aspect_ratio: "16:9"
+
+notes:
+  - "The dashboard relies on REST API polling since no WebSocket was explicitly requested for this React iteration."
+  - "API calls are mapped exactly to the routes provided: /api/status, /api/news, /api/builds, /api/price/:item"

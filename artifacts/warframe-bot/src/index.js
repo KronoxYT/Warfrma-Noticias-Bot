@@ -20,7 +20,7 @@ import express from "express";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import { Client, GatewayIntentBits, Collection, Events } from "discord.js";
-import { readdirSync } from "fs";
+import { readdirSync, writeFileSync } from "fs";
 import cron from "node-cron";
 
 import { initWsServer, broadcast } from "./websocket/websocket.js";
@@ -110,11 +110,36 @@ async function loadCommands() {
 
 // ─── Discord Events ────────────────────────────────────────────────────────
 
+// ─── Shared Status File ────────────────────────────────────────────────────
+// Writes bot status to a JSON file so the api-server can read it
+// and serve it at GET /api/status without needing to talk to this process.
+
+const STATUS_FILE = join(__dirname, "database/status.json");
+
+function writeStatus() {
+  if (!client.isReady()) return;
+  let totalUsers = 0;
+  client.guilds.cache.forEach((g) => { totalUsers += g.memberCount ?? 0; });
+  const status = {
+    online:       true,
+    name:         client.user.tag,
+    avatar:       client.user.displayAvatarURL({ size: 128 }),
+    guildCount:   client.guilds.cache.size,
+    userCount:    totalUsers,
+    connectedAt:  new Date(botStartTime).toISOString(),
+  };
+  try { writeFileSync(STATUS_FILE, JSON.stringify(status, null, 2), "utf-8"); } catch {}
+}
+
 client.once(Events.ClientReady, (readyClient) => {
   botStartTime = Date.now();
   console.log(`[BOT] Logged in as: ${readyClient.user.tag}`);
   console.log(`[BOT] Commands loaded: ${client.commands.size}`);
   readyClient.user.setActivity("Warframe | /news /price /build /alerts");
+
+  // Write status immediately and then every 30 seconds
+  writeStatus();
+  setInterval(writeStatus, 30_000);
 
   // Notify dashboard clients that the bot is online
   broadcast("bot_started", {

@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Warfrma Noticias Dashboard"
+version = "1.0.0"
+id = "artifacts/warframe-dashboard"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+localPort = 22944
+name = "web"
+paths = ["/"]
+
+[services.development]
+run = "pnpm --filter @workspace/warframe-dashboard run dev"
+
+[services.env]
+PORT = "22944"
+BASE_PATH = "/"
+
+[services.production]
+build = ["pnpm", "--filter", "@workspace/warframe-dashboard", "run", "build"]
+publicDir = "artifacts/warframe-dashboard/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"

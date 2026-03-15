@@ -1,0 +1,103 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800&family=Rajdhani:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme inline {
+  --font-display: 'Orbitron', sans-serif;
+  --font-sans: 'Rajdhani', sans-serif;
+
+  --color-background: hsl(225 30% 6%);
+  --color-foreground: hsl(210 40% 98%);
+  
+  --color-card: hsl(225 25% 9%);
+  --color-card-foreground: hsl(210 40% 98%);
+  
+  --color-border: hsl(225 25% 15%);
+  --color-input: hsl(225 25% 15%);
+  --color-ring: hsl(45 68% 47%);
+
+  --color-primary: hsl(45 68% 47%);
+  --color-primary-foreground: hsl(225 30% 6%);
+  
+  --color-secondary: hsl(217 91% 60%);
+  --color-secondary-foreground: hsl(210 40% 98%);
+  
+  --color-muted: hsl(225 25% 13%);
+  --color-muted-foreground: hsl(215 20% 65%);
+  
+  --color-accent: hsl(45 68% 47%);
+  --color-accent-foreground: hsl(225 30% 6%);
+  
+  --color-destructive: hsl(0 84% 60%);
+  --color-destructive-foreground: hsl(210 40% 98%);
+  
+  --color-success: hsl(152 69% 45%);
+  --color-success-foreground: hsl(225 30% 6%);
+
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+}
+
+:root {
+  --background: 225 30% 6%;
+  --foreground: 210 40% 98%;
+  --card: 225 25% 9%;
+  --card-foreground: 210 40% 98%;
+  --border: 225 25% 15%;
+  --primary: 45 68% 47%;
+  --primary-foreground: 225 30% 6%;
+  --secondary: 217 91% 60%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 225 25% 13%;
+  --muted-foreground: 215 20% 65%;
+  --accent: 45 68% 47%;
+  --accent-foreground: 225 30% 6%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 210 40% 98%;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-foreground antialiased font-sans min-h-screen;
+    background-image: 
+      radial-gradient(circle at 15% 50%, rgba(201, 162, 39, 0.03), transparent 35%),
+      radial-gradient(circle at 85% 30%, rgba(74, 143, 212, 0.03), transparent 35%);
+    background-attachment: fixed;
+  }
+}
+
+@layer utilities {
+  .glass-panel {
+    @apply bg-card/60 backdrop-blur-xl border border-border shadow-2xl;
+  }
+  
+  .neon-border {
+    @apply border border-primary/40 shadow-[0_0_15px_rgba(201,162,39,0.15)];
+  }
+  
+  .neon-border-hover {
+    @apply transition-all duration-300;
+  }
+  
+  .neon-border-hover:hover {
+    @apply border-primary/70 shadow-[0_0_20px_rgba(201,162,39,0.25)] -translate-y-1;
+  }
+  
+  .neon-text {
+    @apply text-primary drop-shadow-[0_0_8px_rgba(201,162,39,0.5)];
+  }
+  
+  .glow-bg {
+    @apply relative;
+  }
+  
+  .glow-bg::before {
+    content: '';
+    @apply absolute inset-0 bg-primary/20 blur-2xl rounded-full z-0 opacity-0 transition-opacity duration-500;
+  }
+  
+  .glow-bg:hover::before {
+    @apply opacity-100;
+  }
+}
