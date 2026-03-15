@@ -59,6 +59,13 @@ WebSocket broadcasts: `bot_started`, `status_update`, `alert_triggered`, `news_u
 - `CLIENT_ID` — Application ID
 - `GUILD_ID` — Discord server ID
 - `PORT` — Auto-set by Replit for keep-alive Express server
+- `GITHUB_TOKEN` — GitHub Personal Access Token (classic, repo scope) used for pushing to GitHub. The user dismissed the Replit GitHub integration, so this secret is used manually instead.
+
+### GitHub Repository
+
+- Remote: https://github.com/KronoxYT/Warfrma-Noticias-Bot.git
+- Branch: `main`
+- To push updates: set the remote URL with the token temporarily, push HEAD:main, then reset the URL.
 
 ## Stack
 
