@@ -64,8 +64,8 @@ WebSocket broadcasts: `bot_started`, `status_update`, `alert_triggered`, `news_u
 ### GitHub Repository
 
 - Remote: https://github.com/KronoxYT/Warfrma-Noticias-Bot.git
-- Branch: `master`
-- To push updates: set the remote URL with the token temporarily, push, then reset the URL.
+- Branch: `main`
+- To push updates: set the remote URL with the token temporarily, push HEAD:main, then reset the URL.
 
 ## Stack
 
