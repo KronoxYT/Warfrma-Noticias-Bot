@@ -38,6 +38,21 @@ To add new slash commands:
 
 To add new builds: edit `src/database/builds.json` with the item key in snake_case.
 
+### Web Dashboard
+
+Served at the root of the bot's HTTP server (port 3000). All pages share `src/web/style.css` and `src/web/dashboard.js`.
+
+| Page | URL | Description |
+|------|-----|-------------|
+| Dashboard | `/dashboard.html` | Bot status + live WebSocket event log |
+| News | `/news.html` | Warframe news feed |
+| Prices | `/prices.html` | Price checker with top-sellers table |
+| Builds | `/builds.html` | Searchable build database |
+
+REST API endpoints: `GET /api/status`, `GET /api/news`, `GET /api/builds`, `GET /api/price/:item`
+
+WebSocket broadcasts: `bot_started`, `status_update`, `alert_triggered`, `news_updated`
+
 ### Environment Variables Required
 
 - `DISCORD_TOKEN` — Bot token (Discord Developer Portal)

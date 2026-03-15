@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — Warfrma Noticias</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+
+<!-- ─── Navbar ─────────────────────────────────────────── -->
+<nav class="navbar">
+  <div class="logo">
+    <span class="dot" id="bot-dot"></span>
+    Warfrma Noticias
+  </div>
+  <ul class="nav-links">
+    <li><a href="/dashboard.html">📊 Dashboard</a></li>
+    <li><a href="/news.html">📰 News</a></li>
+    <li><a href="/prices.html">💰 Prices</a></li>
+    <li><a href="/builds.html">🔧 Builds</a></li>
+  </ul>
+  <div class="ws-indicator">
+    <div class="ws-dot" id="ws-dot"></div>
+    <span id="ws-label">Connecting…</span>
+  </div>
+</nav>
+
+<!-- ─── Content ────────────────────────────────────────── -->
+<main class="page">
+  <div class="page-header">
+    <h1>📊 Dashboard</h1>
+    <p>Real-time status of the Warfrma Noticias Discord bot</p>
+  </div>
+
+  <!-- Stat cards -->
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-label">Status</div>
+      <div class="stat-value" id="stat-status">—</div>
+      <div class="stat-sub" id="stat-name">Loading…</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Uptime</div>
+      <div class="stat-value" id="stat-uptime">—</div>
+      <div class="stat-sub">Since last restart</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Servers</div>
+      <div class="stat-value" id="stat-guilds">—</div>
+      <div class="stat-sub">Discord guilds</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Users</div>
+      <div class="stat-value" id="stat-users">—</div>
+      <div class="stat-sub">Across all servers</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Commands</div>
+      <div class="stat-value">4</div>
+      <div class="stat-sub">/news /price /build /alerts</div>
+    </div>
+  </div>
+
+  <!-- Live event log -->
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+      <div style="font-weight:600;">🔴 Live Events</div>
+      <div class="badge badge-blue" id="event-count">0 events</div>
+    </div>
+    <div class="event-log" id="event-log">
+      <div class="empty">
+        <div class="empty-icon">📡</div>
+        <p>Waiting for real-time events…</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="/dashboard.js"></script>
+<script>
+  // ─── Status Polling ───────────────────────────────────────
+
+  let eventCount = 0;
+
+  async function fetchStatus() {
+    try {
+      const res  = await fetch("/api/status");
+      const data = await res.json();
+      updateStatusCards(data);
+    } catch {
+      document.getElementById("stat-status").textContent = "Error";
+    }
+  }
+
+  function updateStatusCards(data) {
+    const statusEl = document.getElementById("stat-status");
+    const dot      = document.getElementById("bot-dot");
+
+    if (data.online) {
+      statusEl.innerHTML = '<span class="badge badge-green">● Online</span>';
+      dot.classList.remove("offline");
+    } else {
+      statusEl.innerHTML = '<span class="badge badge-red">● Offline</span>';
+      dot.classList.add("offline");
+    }
+
+    document.getElementById("stat-name").textContent   = data.name || "—";
+    document.getElementById("stat-uptime").textContent = data.uptimeFormatted || "—";
+    document.getElementById("stat-guilds").textContent = data.guildCount ?? "—";
+    document.getElementById("stat-users").textContent  = data.userCount ?? "—";
+  }
+
+  // ─── Event Log ────────────────────────────────────────────
+
+  function addLogEntry(msg, type = "") {
+    const log = document.getElementById("event-log");
+
+    // Remove empty placeholder
+    const empty = log.querySelector(".empty");
+    if (empty) empty.remove();
+
+    eventCount++;
+    document.getElementById("event-count").textContent = `${eventCount} event${eventCount !== 1 ? "s" : ""}`;
+
+    const now  = new Date().toLocaleTimeString();
+    const el   = document.createElement("div");
+    el.className = `log-entry ${type}`;
+    el.innerHTML = `<span class="log-time">${now}</span><span class="log-msg">${msg}</span>`;
+
+    log.prepend(el);
+
+    // Keep max 50 entries
+    const entries = log.querySelectorAll(".log-entry");
+    if (entries.length > 50) entries[entries.length - 1].remove();
+  }
+
+  // ─── WebSocket Event Handlers ─────────────────────────────
+
+  document.addEventListener("DOMContentLoaded", () => {
+    fetchStatus();
+    setInterval(fetchStatus, 30_000);
+
+    onWsEvent("connected", () => {
+      addLogEntry("Connected to dashboard WebSocket", "online");
+    });
+
+    onWsEvent("bot_started", (msg) => {
+      addLogEntry(`<strong>Bot online:</strong> ${msg.data.name} — ${msg.data.guildCount} server(s)`, "online");
+      fetchStatus();
+    });
+
+    onWsEvent("status_update", (msg) => {
+      updateStatusCards({
+        online:          true,
+        name:            msg.data.name,
+        guildCount:      msg.data.guildCount,
+        userCount:       msg.data.userCount,
+        uptimeFormatted: formatUptime(msg.data.uptimeMs),
+      });
+    });
+
+    onWsEvent("alert_triggered", (msg) => {
+      const d = msg.data;
+      addLogEntry(
+        `<strong>🚨 Alert fired:</strong> ${d.item} dropped to <strong>${d.currentPrice}p</strong> (target: ${d.targetPrice}p) — notified <strong>${d.user}</strong>`,
+        "alert"
+      );
+    });
+
+    onWsEvent("news_updated", () => {
+      addLogEntry("📰 Warframe news feed refreshed");
+    });
+  });
+</script>
+</body>
+</html>

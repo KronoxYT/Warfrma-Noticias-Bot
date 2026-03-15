@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>News — Warfrma Noticias</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="logo">
+    <span class="dot" id="bot-dot"></span>
+    Warfrma Noticias
+  </div>
+  <ul class="nav-links">
+    <li><a href="/dashboard.html">📊 Dashboard</a></li>
+    <li><a href="/news.html">📰 News</a></li>
+    <li><a href="/prices.html">💰 Prices</a></li>
+    <li><a href="/builds.html">🔧 Builds</a></li>
+  </ul>
+  <div class="ws-indicator">
+    <div class="ws-dot" id="ws-dot"></div>
+    <span id="ws-label">Connecting…</span>
+  </div>
+</nav>
+
+<main class="page">
+  <div class="page-header">
+    <h1>📰 Warframe News</h1>
+    <p>Latest official Warframe news from Digital Extremes</p>
+  </div>
+
+  <!-- Loading state -->
+  <div class="loading-wrap" id="loading">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- News cards -->
+  <div class="news-grid" id="news-grid" style="display:none;"></div>
+
+  <!-- Error state -->
+  <div class="empty" id="news-error" style="display:none;">
+    <div class="empty-icon">⚠️</div>
+    <p>Failed to load news. Please try again later.</p>
+  </div>
+</main>
+
+<script src="/dashboard.js"></script>
+<script>
+  async function loadNews() {
+    const loading = document.getElementById("loading");
+    const grid    = document.getElementById("news-grid");
+    const errEl   = document.getElementById("news-error");
+
+    try {
+      const res      = await fetch("/api/news");
+      const articles = await res.json();
+
+      if (!Array.isArray(articles) || articles.length === 0) throw new Error("No articles");
+
+      grid.innerHTML = articles.map((a) => `
+        <a class="news-card" href="${a.link || "#"}" target="_blank" rel="noopener">
+          ${a.imageLink
+            ? `<img class="news-img" src="${a.imageLink}" alt="${a.message}" loading="lazy" onerror="this.style.display='none'" />`
+            : `<div class="news-img-placeholder">🎮</div>`
+          }
+          <div class="news-body">
+            <div class="news-title">${a.message || "Warframe Update"}</div>
+            <div class="news-date">${formatDate(a.date)}</div>
+            <span class="news-link">Read more →</span>
+          </div>
+        </a>
+      `).join("");
+
+      loading.style.display = "none";
+      grid.style.display    = "grid";
+    } catch (err) {
+      loading.style.display   = "none";
+      errEl.style.display     = "block";
+    }
+  }
+
+  function formatDate(dateStr) {
+    if (!dateStr) return "";
+    return new Date(dateStr).toLocaleDateString("en-US", {
+      year: "numeric", month: "short", day: "numeric",
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", loadNews);
+</script>
+</body>
+</html>

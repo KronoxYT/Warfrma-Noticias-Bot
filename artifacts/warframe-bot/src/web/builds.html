@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Builds — Warfrma Noticias</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="logo">
+    <span class="dot" id="bot-dot"></span>
+    Warfrma Noticias
+  </div>
+  <ul class="nav-links">
+    <li><a href="/dashboard.html">📊 Dashboard</a></li>
+    <li><a href="/news.html">📰 News</a></li>
+    <li><a href="/prices.html">💰 Prices</a></li>
+    <li><a href="/builds.html">🔧 Builds</a></li>
+  </ul>
+  <div class="ws-indicator">
+    <div class="ws-dot" id="ws-dot"></div>
+    <span id="ws-label">Connecting…</span>
+  </div>
+</nav>
+
+<main class="page">
+  <div class="page-header">
+    <h1>🔧 Builds Database</h1>
+    <p>Community builds for Warframes and weapons</p>
+  </div>
+
+  <!-- Search + filter -->
+  <div class="search-bar" style="margin-bottom:16px;">
+    <input
+      type="text"
+      id="search-input"
+      placeholder='Filter builds… e.g. "Mesa", "Weapon"'
+      oninput="filterBuilds()"
+      autocomplete="off"
+    />
+  </div>
+  <div style="display:flex; gap:8px; margin-bottom:24px; flex-wrap:wrap;">
+    <button class="btn filter-btn active" style="padding:5px 14px; font-size:0.8rem;" data-filter="all" onclick="setFilter('all', this)">All</button>
+    <button class="btn filter-btn" style="padding:5px 14px; font-size:0.8rem;" data-filter="warframe" onclick="setFilter('warframe', this)">Warframes</button>
+    <button class="btn filter-btn" style="padding:5px 14px; font-size:0.8rem;" data-filter="weapon" onclick="setFilter('weapon', this)">Weapons</button>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-wrap" id="loading">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Grid -->
+  <div class="builds-grid" id="builds-grid" style="display:none;"></div>
+
+  <!-- Empty state -->
+  <div class="empty" id="builds-empty" style="display:none;">
+    <div class="empty-icon">🔍</div>
+    <p>No builds match your search.</p>
+  </div>
+</main>
+
+<script src="/dashboard.js"></script>
+<script>
+  let allBuilds = [];
+  let activeFilter = "all";
+
+  async function loadBuilds() {
+    try {
+      const res    = await fetch("/api/builds");
+      allBuilds    = await res.json();
+      renderBuilds();
+      document.getElementById("loading").style.display = "none";
+      document.getElementById("builds-grid").style.display = "grid";
+    } catch {
+      document.getElementById("loading").innerHTML =
+        '<div class="empty"><div class="empty-icon">⚠️</div><p>Failed to load builds.</p></div>';
+    }
+  }
+
+  function setFilter(filter, btn) {
+    activeFilter = filter;
+    document.querySelectorAll(".filter-btn").forEach((b) => {
+      b.style.background = "var(--bg-card)";
+      b.style.border     = "1px solid var(--border)";
+      b.style.color      = "var(--text-muted)";
+    });
+    btn.style.background = "var(--accent)";
+    btn.style.color      = "#0d0e14";
+    btn.style.border     = "1px solid var(--accent)";
+    renderBuilds();
+  }
+
+  function filterBuilds() {
+    renderBuilds();
+  }
+
+  function renderBuilds() {
+    const query = document.getElementById("search-input").value.trim().toLowerCase();
+    const grid  = document.getElementById("builds-grid");
+    const empty = document.getElementById("builds-empty");
+
+    const filtered = allBuilds.filter((b) => {
+      const matchType   = activeFilter === "all" || b.type === activeFilter;
+      const matchSearch = !query
+        || b.displayName.toLowerCase().includes(query)
+        || b.type.toLowerCase().includes(query)
+        || (b.description || "").toLowerCase().includes(query)
+        || (b.mods || []).some((m) => m.toLowerCase().includes(query));
+      return matchType && matchSearch;
+    });
+
+    if (filtered.length === 0) {
+      grid.style.display  = "none";
+      empty.style.display = "block";
+      return;
+    }
+
+    empty.style.display = "none";
+    grid.style.display  = "grid";
+
+    grid.innerHTML = filtered.map((b) => `
+      <div class="build-card">
+        <div class="build-header">
+          <div>
+            <div class="build-name">${b.displayName}</div>
+            <div class="build-type">${b.type === "warframe" ? "⚡ Warframe" : "🔫 Weapon"}</div>
+          </div>
+          <span class="badge ${b.type === 'warframe' ? 'badge-blue' : 'badge-gold'}">
+            ${b.difficulty || "Any"}
+          </span>
+        </div>
+        <div class="build-desc">${b.description || ""}</div>
+        <div class="mod-list">
+          ${(b.mods || []).map((m) => `<span class="mod-chip">${m}</span>`).join("")}
+        </div>
+        <div class="build-meta">
+          <span>⚗️ Forma: <strong>${b.forma ?? "?"}</strong></span>
+          <span>📋 Mods: <strong>${(b.mods || []).length}</strong></span>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  // Style active filter button on load
+  document.addEventListener("DOMContentLoaded", () => {
+    const allBtn = document.querySelector('[data-filter="all"]');
+    allBtn.style.background = "var(--accent)";
+    allBtn.style.color      = "#0d0e14";
+    allBtn.style.border     = "1px solid var(--accent)";
+    loadBuilds();
+  });
+</script>
+</body>
+</html>

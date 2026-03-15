@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prices — Warfrma Noticias</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="logo">
+    <span class="dot" id="bot-dot"></span>
+    Warfrma Noticias
+  </div>
+  <ul class="nav-links">
+    <li><a href="/dashboard.html">📊 Dashboard</a></li>
+    <li><a href="/news.html">📰 News</a></li>
+    <li><a href="/prices.html">💰 Prices</a></li>
+    <li><a href="/builds.html">🔧 Builds</a></li>
+  </ul>
+  <div class="ws-indicator">
+    <div class="ws-dot" id="ws-dot"></div>
+    <span id="ws-label">Connecting…</span>
+  </div>
+</nav>
+
+<main class="page">
+  <div class="page-header">
+    <h1>💰 Price Check</h1>
+    <p>Find the cheapest online sellers on Warframe Market</p>
+  </div>
+
+  <!-- Search -->
+  <div class="search-bar">
+    <input
+      type="text"
+      id="item-input"
+      placeholder='Search item… e.g. "Ash Prime Set", "Laetum"'
+      autocomplete="off"
+    />
+    <button class="btn btn-primary" id="search-btn" onclick="searchPrice()">Check Price</button>
+  </div>
+
+  <!-- Quick suggestions -->
+  <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:24px;" id="suggestions">
+    <span style="font-size:0.8rem; color:var(--text-muted); align-self:center;">Quick:</span>
+    <button class="btn" style="padding:4px 12px; font-size:0.8rem; background:var(--bg-card); border:1px solid var(--border);" onclick="quickSearch('Laetum')">Laetum</button>
+    <button class="btn" style="padding:4px 12px; font-size:0.8rem; background:var(--bg-card); border:1px solid var(--border);" onclick="quickSearch('Ash Prime Set')">Ash Prime Set</button>
+    <button class="btn" style="padding:4px 12px; font-size:0.8rem; background:var(--bg-card); border:1px solid var(--border);" onclick="quickSearch('Kuva Bramma')">Kuva Bramma</button>
+    <button class="btn" style="padding:4px 12px; font-size:0.8rem; background:var(--bg-card); border:1px solid var(--border);" onclick="quickSearch('Torid')">Torid</button>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-wrap" id="price-loading" style="display:none;">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Error -->
+  <div class="card" id="price-error" style="display:none;">
+    <div class="empty">
+      <div class="empty-icon">❌</div>
+      <p id="price-error-msg">Item not found.</p>
+    </div>
+  </div>
+
+  <!-- Result -->
+  <div id="price-result">
+    <div class="card" style="margin-bottom:20px;">
+      <div style="margin-bottom:16px;">
+        <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:.08em; color:var(--text-muted); margin-bottom:4px;">Item</div>
+        <div style="font-weight:700; font-size:1.2rem;" id="result-name">—</div>
+      </div>
+      <div class="price-hero">
+        <div>
+          <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:2px;">Lowest Price</div>
+          <div class="price-big" id="result-price">—<span>plat</span></div>
+        </div>
+        <div>
+          <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:4px;">Cheapest Seller</div>
+          <div style="font-weight:600;" id="result-seller">—</div>
+          <div style="font-size:0.8rem; color:var(--text-muted);" id="result-rep">—</div>
+        </div>
+        <div style="margin-left:auto;">
+          <div class="badge badge-gold" id="result-count">— sellers</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top sellers table -->
+    <div class="card">
+      <div style="font-weight:600; margin-bottom:14px;">Top Online Sellers</div>
+      <table class="price-table">
+        <thead>
+          <tr>
+            <th>Seller</th>
+            <th>Price</th>
+            <th>Qty</th>
+            <th>Rep</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="sellers-body"></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<script src="/dashboard.js"></script>
+<script>
+  const input   = document.getElementById("item-input");
+  const loading = document.getElementById("price-loading");
+  const errEl   = document.getElementById("price-error");
+  const result  = document.getElementById("price-result");
+
+  input.addEventListener("keydown", (e) => { if (e.key === "Enter") searchPrice(); });
+
+  function quickSearch(name) {
+    input.value = name;
+    searchPrice();
+  }
+
+  async function searchPrice() {
+    const raw = input.value.trim();
+    if (!raw) return;
+
+    const slug = toSlug(raw);
+
+    loading.style.display = "flex";
+    errEl.style.display   = "none";
+    result.style.display  = "none";
+    document.getElementById("search-btn").disabled = true;
+
+    try {
+      const res  = await fetch(`/api/price/${encodeURIComponent(slug)}`);
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error || "Unknown error");
+
+      document.getElementById("result-name").textContent  = data.item;
+      document.getElementById("result-price").innerHTML   = `${data.cheapest.platinum}<span>plat</span>`;
+      document.getElementById("result-seller").textContent = data.cheapest.seller;
+      document.getElementById("result-rep").textContent   = `Rep: ${data.cheapest.reputation}`;
+      document.getElementById("result-count").textContent = `${data.totalSellers} online sellers`;
+
+      const tbody = document.getElementById("sellers-body");
+      tbody.innerHTML = data.topSellers.map((s) => `
+        <tr>
+          <td><strong>${s.seller}</strong></td>
+          <td><strong style="color:var(--accent)">${s.platinum}</strong> plat</td>
+          <td>${s.quantity}</td>
+          <td>${s.reputation}</td>
+          <td>
+            <span class="status-dot status-${s.status}"></span>
+            ${s.status}
+          </td>
+        </tr>
+      `).join("");
+
+      loading.style.display = "none";
+      result.style.display  = "block";
+    } catch (err) {
+      document.getElementById("price-error-msg").textContent = err.message || "Failed to fetch price.";
+      loading.style.display = "none";
+      errEl.style.display   = "block";
+    } finally {
+      document.getElementById("search-btn").disabled = false;
+    }
+  }
+</script>
+</body>
+</html>
