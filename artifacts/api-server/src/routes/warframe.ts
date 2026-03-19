@@ -47,9 +47,9 @@ router.get("/status", (_req, res) => {
     const uptimeMs = status.connectedAt
       ? Date.now() - new Date(status.connectedAt).getTime()
       : 0;
-    res.json({ ...status, uptimeMs, uptimeFormatted: formatUptime(uptimeMs) });
+    return res.json({ ...status, uptimeMs, uptimeFormatted: formatUptime(uptimeMs) });
   } catch {
-    res.status(500).json({ error: "Could not read bot status." });
+    return res.status(500).json({ error: "Could not read bot status." });
   }
 });
 
@@ -104,7 +104,7 @@ router.get("/price/:item", async (req, res) => {
     }
 
     const cheapest = sellers[0];
-    res.json({
+    return res.json({
       item: toReadable(slug),
       slug,
       totalSellers: sellers.length,
@@ -127,7 +127,7 @@ router.get("/price/:item", async (req, res) => {
     if (err.response?.status === 404) {
       return res.status(404).json({ error: `Item "${slug}" not found on Warframe Market.` });
     }
-    res.status(502).json({ error: err.message });
+    return res.status(502).json({ error: err.message });
   }
 });
 
